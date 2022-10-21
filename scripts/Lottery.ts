@@ -190,7 +190,7 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function buyTokens(index: string, amount: string) {
-    const tx = await lottery.purchaseTokens({ value: ethers.utils.parseEther(amount), });
+    const tx = await lottery.connect(accounts[Number(index)]).purchaseTokens({ value: ethers.utils.parseEther(amount), });
     const receipt = await tx.wait();
     console.log(`Tokens bought (${receipt.transactionHash})\n`);
   }
