@@ -29,4 +29,9 @@ contract Lottery is Ownable {
         betsOpen = true;
     }
 
+    /// @notice Give tokens based on the amount of ETH sent
+    function purchaseTokens() public payable {
+        paymentToken.mint(msg.sender, msg.value);
+    }
+
 }
