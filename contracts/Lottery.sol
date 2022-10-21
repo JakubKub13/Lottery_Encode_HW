@@ -101,4 +101,10 @@ contract Lottery is Ownable {
     ownerPool -= amount;
     paymentToken.transfer(msg.sender, amount);
    }
+
+   ///@notice Burn amount tokens and give the equivalent ETH back to user
+   function returnTokens(uint256 amount) public {
+    paymentToken.burnFrom(msg.sender, amount);
+    payable(msg.sender).transfer(amount);
+   }
 }
