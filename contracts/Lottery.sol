@@ -58,6 +58,15 @@ contract Lottery is Ownable {
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
     }
 
+    ///@notice Calls the bet function times times
+    function betMany(uint256 times) public {
+        require(times > 0);
+        while (times > 0) {
+            bet();
+            times--;
+        }
+    }
+
     /// @notice Close the lottery and claculates  the price if any,
     /// @dev Anyone can call this function if the owenr fails to do so
     function  closeLottery() public {
