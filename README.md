@@ -1,14 +1,13 @@
-# Sample Hardhat Project
-
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
-# Lottery_Encode_HW
+Implementation details
+Implement ownable
+Owner start lottery and define betting duration and fee
+Define a block timestamp target
+Players must buy an ERC20 with ETH
+Players pay ERC20 to bet
+Only possible before block timestamp met
+Anyone can roll the lottery
+Only after block timestamp target is met
+Randomness from RANDAO
+Winner receives the pooled ERC20 minus fee
+Owner can withdraw fees and restart lottery
+Players can burn ERC20 tokens and redeem ETH
