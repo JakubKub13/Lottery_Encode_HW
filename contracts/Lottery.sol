@@ -79,6 +79,7 @@ contract Lottery is Ownable {
             prizePool = 0;
             delete (_slots);
         }
+        betsOpen = false;
     }
 
     /// @notice Get a random number calculated from the previous block randao
