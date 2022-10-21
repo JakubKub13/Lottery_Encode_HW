@@ -18,7 +18,12 @@ contract Lottery is Ownable {
     }
 
     modifier whenBetsClosed() {
-        require(!betsOpen, "Lottery: Bets are not closed");
+        require(!betsOpen, "Lottery: Bets are open");
+        _;
+    }
+
+    modifier whenBetsOpen() {
+        require(betsOpen && block.timestamp < closingTime, "Lottery: Bets are closed");
         _;
     }
 
@@ -31,7 +36,12 @@ contract Lottery is Ownable {
 
     /// @notice Give tokens based on the amount of ETH sent
     function purchaseTokens() public payable {
-        paymentToken.mint(msg.sender, msg.value);
+        paymentToken.mint(msg.sender, msg.value * 100);
     }
 
+    function bet() public whenBetsOpen {
+        paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
+        //TO DO give fair chance for this person
+
+    }
 }
