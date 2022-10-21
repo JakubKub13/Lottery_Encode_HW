@@ -11,6 +11,18 @@ contract Lottery is Ownable {
     uint256 public betPrice;
     uint256 public betFee;
 
+    ///@notice Amount of tokens in the prize pool
+    uint256 public prizePool;
+
+    ///@notice Amount of tokens in the owner pool
+    uint256 public ownerPool;
+
+    ///@notice Mapping of the prize availabel for withdraw for each account
+    mapping(address => uint256) public prize;
+
+    ///@dev List of bet slots
+    address[] _slots;
+
     constructor(string memory tokenName, string memory tokenSymbol, uint256 _betPrice, uint256 _betFee) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
         betPrice = _betPrice;
@@ -40,8 +52,27 @@ contract Lottery is Ownable {
     }
 
     function bet() public whenBetsOpen {
+        _slots.push(msg.sender);
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
-        //TO DO give fair chance for this person
-
     }
+
+    /// @notice Close the lottery and claculates  the price if any,
+    /// @dev Anyone can call this function if the owenr fails to do so
+    function  closeLottery() public {
+        require(block.timestamp >= closingTime, "Lottery: Can not close lottery yer");
+        require(betsOpen, "Lottery: Already closed");
+        if(_slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % _slots.length;
+            address winner = _slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete(_slots);
+        }
+    }
+
+    /// @notice Get a random number calculated from the previous block randao
+    /// @dev This only works after the Merg/// @notice Explain to an end user what this does
+   function getRandomNumber() public view returns (uint256 randomNumber) {
+    randomNumber = block.difficulty;
+   }
 }

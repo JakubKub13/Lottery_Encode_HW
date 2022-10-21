@@ -7,6 +7,11 @@ const config: HardhatUserConfig = {
       {version: "0.8.17"},
     ],
   },
+  networks: {
+    hardhat: {
+      hardfork: "merge"
+    }
+  }
 };
 
 export default config;
