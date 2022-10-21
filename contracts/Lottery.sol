@@ -52,6 +52,8 @@ contract Lottery is Ownable {
     }
 
     function bet() public whenBetsOpen {
+        ownerPool += betFee;
+        prizePool += betPrice;
         _slots.push(msg.sender);
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
     }
@@ -66,7 +68,7 @@ contract Lottery is Ownable {
             address winner = _slots[winnerIndex];
             prize[winner] += prizePool;
             prizePool = 0;
-            delete(_slots);
+            delete (_slots);
         }
     }
 
