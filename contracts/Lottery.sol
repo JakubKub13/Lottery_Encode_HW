@@ -6,9 +6,12 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract Lottery is Ownable {
     uint256 public closingTime;
     bool public betsOpen;
+    uint256 public betPrice;
+    uint256 public betFee;
 
     constructor(uint256 _betPrice, uint256 _betFee) {
-        
+        betPrice = _betPrice;
+        betFee = _betFee;
     }
 
     modifier whenBetsClosed() {

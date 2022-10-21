@@ -1,8 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { ethers } from "hardhat";
 import * as readline from "readline";
 import { InfinitumToken, Lottery } from "../typechain-types/contracts";
 
-let contract: Lottery;
+let lottery: Lottery;
 let token: InfinitumToken;
 let accounts: SignerWithAddress[];
 
@@ -19,9 +20,18 @@ async function main() {
     mainMenu(r1);
 }
 
-async function initContracts() {}
+async function initContracts() {
+    const lotteryFactory = await ethers.getContractFactory("Lottery");
+    lottery = await lotteryFactory.deploy(
+        ethers.utils.parseEther(BET_PRICE.toFixed(18)),
+        ethers.utils.parseEther(BET_FEE.toFixed(18))
+    );
+    await lottery.deployed();
+}
 
-async function initAccounts() {}
+async function initAccounts() {
+    accounts = await ethers.getSigners();
+}
 
 async function mainMenu(r1: readline.Interface) {
     menuOptions(r1);
@@ -150,7 +160,8 @@ function menuOptions(rl: readline.Interface) {
   }
 
   async function checkState() {
-    // TODO
+    const state = await lottery.betsOpen();
+    console.log(`The lottery is ${state ? "open" : "closed"}\n`);
   }
   
   async function openBets(duration: string) {
