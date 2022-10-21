@@ -87,4 +87,18 @@ contract Lottery is Ownable {
    function getRandomNumber() public view returns (uint256 randomNumber) {
     randomNumber = block.difficulty;
    }
+
+   ///@notice Withdraw amount from that account prize pool
+   function prizeWithdraw(uint256 amount) public {
+    require(amount <= prize[msg.sender], "Lottery: Not enought prize");
+    prize[msg.sender] -= amount;
+    paymentToken.transfer(msg.sender, amount);
+   }
+
+   ///@notice Withdraw amount from the owner pool
+   function ownerWithdraw(uint256 amount) public onlyOwner {
+    require(amount <= ownerPool, "Lottery: Not enough fees collected");
+    ownerPool -= amount;
+    paymentToken.transfer(msg.sender, amount);
+   }
 }
