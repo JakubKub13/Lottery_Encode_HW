@@ -2,14 +2,17 @@
 pragma solidity 0.8.17;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {InfinitumToken} from "./InfinitumToken.sol";
 
 contract Lottery is Ownable {
+    InfinitumToken public paymentToken;
     uint256 public closingTime;
     bool public betsOpen;
     uint256 public betPrice;
     uint256 public betFee;
 
-    constructor(uint256 _betPrice, uint256 _betFee) {
+    constructor(string memory tokenName, string memory tokenSymbol, uint256 _betPrice, uint256 _betFee) {
+        paymentToken = new InfinitumToken(tokenName, tokenSymbol);
         betPrice = _betPrice;
         betFee = _betFee;
     }

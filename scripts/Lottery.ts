@@ -162,10 +162,20 @@ function menuOptions(rl: readline.Interface) {
   async function checkState() {
     const state = await lottery.betsOpen();
     console.log(`The lottery is ${state ? "open" : "closed"}\n`);
+    if (!state) return;
+    const currentBlock = await ethers.provider.getBlock("latest");
+    const currentBlockDate = new Date(currentBlock.timestamp * 1000);
+    const closingTime = await lottery.closingTime();
+    const closingTimeDate = new Date(closingTime.toNumber() * 1000);
+    console.log(`The last block was mined at ${currentBlockDate.toLocaleDateString()} : ${currentBlockDate.toLocaleTimeString()}`);
+    console.log(`Lottery should close at ${closingTimeDate.toLocaleDateString()} : ${closingTimeDate.toLocaleTimeString()}`);
   }
   
   async function openBets(duration: string) {
-    // TODO
+    const currentBlock = await ethers.provider.getBlock("latest");
+    const tx = await lottery.openBets(currentBlock.timestamp + Number(duration));
+    const receipt = await tx.wait();
+    console.log(`Bets opened (${receipt.transactionHash})`);
   }
   
   async function displayBalance(index: string) {
