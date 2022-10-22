@@ -48,7 +48,7 @@ contract Lottery is Ownable {
 
     /// @notice Give tokens based on the amount of ETH sent
     function purchaseTokens() public payable {
-        paymentToken.mint(msg.sender, msg.value * 100);
+        paymentToken.mint(msg.sender, msg.value);
     }
 
     function bet() public whenBetsOpen {
