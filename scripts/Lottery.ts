@@ -216,8 +216,9 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function displayPrize(index: string) {
-    // TODO
-    return "TODO";
+    const prize = await lottery.prize(accounts[Number(index)].address);
+    const formattedPrize  =ethers.utils.formatEther(prize);
+    console.log(formattedPrize);
   }
   
   async function claimPrize(index: string, amount: string) {

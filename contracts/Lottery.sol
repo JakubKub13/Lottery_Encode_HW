@@ -70,7 +70,7 @@ contract Lottery is Ownable {
     /// @notice Close the lottery and claculates  the price if any,
     /// @dev Anyone can call this function if the owenr fails to do so
     function  closeLottery() public {
-        require(block.timestamp >= closingTime, "Lottery: Can not close lottery yer");
+        require(block.timestamp >= closingTime, "Lottery: Can not close lottery yet");
         require(betsOpen, "Lottery: Already closed");
         if(_slots.length > 0) {
             uint256 winnerIndex = getRandomNumber() % _slots.length;
