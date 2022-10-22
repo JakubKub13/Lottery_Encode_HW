@@ -218,19 +218,23 @@ function menuOptions(rl: readline.Interface) {
   async function displayPrize(index: string) {
     const prize = await lottery.prize(accounts[Number(index)].address);
     const formattedPrize  =ethers.utils.formatEther(prize);
-    console.log(formattedPrize);
+    console.log(`The amount of prize in lottery tokens of address is: ${formattedPrize}`);
   }
   
-  async function claimPrize(index: string, amount: string) {
-    // TODO
-  }
+//   async function claimPrize(index: string, amount: string) {
+    
+//   }
   
   async function displayOwnerPool() {
     // TODO
   }
   
-  async function withdrawTokens(amount: string) {
-    // TODO
+  async function withdrawTokens(index: string, amount: string) {
+    const balanceOfTokensBef = await token.balanceOf(accounts[Number(index)].address);
+    const tx = await lottery.connect(accounts[Number(index)].address).prizeWithdraw(amount);
+    const balanceOfTokensAft = await token.balanceOf(accounts[Number(index)].address);
+    console.log(`Balance of this address before was: ${balanceOfTokensBef}`);
+    console.log(`Balance of this address after withdraw is ${balanceOfTokensAft}`);
   }
   
   async function burnTokens(index: string, amount: string) {
