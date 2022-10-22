@@ -202,7 +202,7 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function bet(index: string, amount: string) {
-    let balanceOfToken = token.balanceOf(accounts[Number(index)].address);
+    const balanceOfToken = token.balanceOf(accounts[Number(index)].address);
     await token.connect(accounts[Number(index)]).approve(lottery.address, balanceOfToken)
     const tx = await lottery.connect(accounts[Number(index)]).bet();
     const receipt = await tx.wait();
@@ -210,7 +210,9 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function closeLottery() {
-    // TODO
+    const tx = await lottery.closeLottery();
+    const receipt = await tx.wait();
+    console.log(`The Lottery was closed the hash of TX is: ${receipt.transactionHash}`);
   }
   
   async function displayPrize(index: string) {
