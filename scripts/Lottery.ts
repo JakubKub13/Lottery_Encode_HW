@@ -202,7 +202,12 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function bet(index: string, amount: string) {
-    // To do
+    let betPrize = ethers.utils.parseEther(BET_PRICE.toFixed(18));
+    let betFee = ethers.utils.parseEther(BET_FEE.toFixed(18));
+    await token.connect(accounts[Number(index)]).approve(lottery.address, BET_FEE + BET_PRICE)
+    const tx = await lottery.connect(accounts[Number(index)]).bet();
+    const receipt = await tx.wait();
+    console.log(`The account of address ${accounts[Number(index)].address} has betted`);
   }
   
   async function closeLottery() {
