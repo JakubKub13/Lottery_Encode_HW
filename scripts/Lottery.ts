@@ -111,6 +111,7 @@ function menuOptions(rl: readline.Interface) {
             rl.question("What account (index) to use?\n", async (index) => {
               const prize = await displayPrize(index);
               if (Number(prize) > 0) {
+                console.log(`this is the ${prize}`)
                 rl.question(
                   "Do you want to claim your prize? [Y/N]\n",
                   async (answer) => {
@@ -217,16 +218,20 @@ function menuOptions(rl: readline.Interface) {
   
   async function displayPrize(index: string) {
     const prize = await lottery.prize(accounts[Number(index)].address);
-    const formattedPrize  =ethers.utils.formatEther(prize);
+    const formattedPrize = ethers.utils.formatEther(prize);
     console.log(`The amount of prize in lottery tokens of address is: ${formattedPrize}`);
+    return prize;
   }
   
   async function claimPrize(index: string, amount: string) {
     const balanceOfTokensBef = await token.balanceOf(accounts[Number(index)].address);
-    const tx = await lottery.connect(accounts[Number(index)].address).prizeWithdraw(amount);
+    const balanceBefFormatted = ethers.utils.formatEther(balanceOfTokensBef)
+    const tx = await lottery.connect(accounts[Number(index)]).prizeWithdraw(amount);
+    const receipt = await tx.wait();
     const balanceOfTokensAft = await token.balanceOf(accounts[Number(index)].address);
-    console.log(`Balance of this address before was: ${balanceOfTokensBef}`);
-    console.log(`Balance of this address after withdraw is ${balanceOfTokensAft}`);
+    const balanceAftFormatted = ethers.utils.formatEther(balanceOfTokensAft);
+    console.log(`Balance of this address before was: ${balanceBefFormatted} TX hash is ${receipt.transactionHash}`);
+    console.log(`Balance of this address after withdraw is ${balanceAftFormatted} TX hash is ${receipt.transactionHash}`);
   }
   
   async function displayOwnerPool() {
