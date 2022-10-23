@@ -251,6 +251,7 @@ function menuOptions(rl: readline.Interface) {
   
   async function burnTokens(index: string, amount: string) {
     const parsedAmount = ethers.utils.parseEther(amount);
+    await token.connect(accounts[Number(index)]).approve(lottery.address, parsedAmount);
     const tx = await lottery.connect(accounts[Number(index)]).returnTokens(parsedAmount);
     const receipt = await tx.wait();
     await displayBalance(index);
