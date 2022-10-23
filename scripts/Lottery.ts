@@ -241,9 +241,10 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function withdrawTokens(amount: string) {
-    const tx = await lottery.ownerWithdraw(amount);
+    const parsedAmount = ethers.utils.parseEther(amount)
+    const tx = await lottery.ownerWithdraw(parsedAmount);
     const receipt = await tx.wait();
-    const balanceOfOwnerAft = await token.balanceOf(accounts[0]);
+    const balanceOfOwnerAft = await token.balanceOf(accounts[0].address);
     const balanceOfOwnerAftFormatted = ethers.utils.formatEther(balanceOfOwnerAft);
     console.log(`Balance of Owner address after withdraw is: ${balanceOfOwnerAftFormatted} TX has is ${receipt.transactionHash}`);
   }
