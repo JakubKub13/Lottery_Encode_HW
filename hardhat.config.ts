@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
+import "dotenv/config"
 import "@nomicfoundation/hardhat-toolbox";
 
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || ""
