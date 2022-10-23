@@ -1,10 +1,10 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import * as readline from "readline";
-import { InfinitumToken, Lottery } from "../typechain-types/contracts";
+import { LotteryToken, Lottery } from "../typechain-types/contracts";
 
 let lottery: Lottery;
-let token: InfinitumToken;
+let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
@@ -29,6 +29,7 @@ async function initContracts() {
         ethers.utils.parseEther(BET_FEE.toFixed(18))
     );
     await lottery.deployed();
+    console.log(`Address of Lottery is: ${lottery.address}`)
     const tokenAddress = await lottery.paymentToken();
     const tokenFactory = await ethers.getContractFactory("LotteryToken")
     token = tokenFactory.attach(tokenAddress);
