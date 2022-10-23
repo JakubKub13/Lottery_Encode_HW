@@ -15,7 +15,7 @@ export const networkConfig: networkConfigInfo = {
 
     5: {
         name: "goerli",
-        lotteryToken: "0x9828c2Ad0A705F3E8D21FE31A1a5edBFDfc67e1f",
+        lotteryToken: "0x97cdf8AfD135a6DCb1BA07DAfcc0Aa3ef1CE6cd4",
         lottery: "0xcC37F0a9Eb32cBC2b548A3e42F7711E6Bf368810",
     },
 
