@@ -14,7 +14,6 @@ contract Lottery is Ownable {
     uint256 public betPrice;
     uint256 public closingTime;
     uint256 public betFee;
-    uint256 public baseFeeToWithdrawPrize;
     uint256 private winningPrizeToTransfer;
 
     address[] public lotteryPlayers;
@@ -24,8 +23,6 @@ contract Lottery is Ownable {
 
     mapping(address => uint256) public winningPrize;
     mapping(address => bool) public lotteryMembers;
-    mapping(address => uint256) public latestBurntAmount;
-    mapping(address => uint256) private burntAmountToTransfer;
 
     constructor(string memory tokenName, string memory tokenSymbol, uint256 _betPrice, uint256 _betFee) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
@@ -63,36 +60,29 @@ contract Lottery is Ownable {
 
     /// @notice Give tokens based on the amount of ETH sent
     function purchaseTokens() public payable {
+        lotteryMembers[msg.sender] = true;
         paymentToken.mint(msg.sender, msg.value);
     }
 
     function bet() public whenBetsOpen {
-        ownerPool += betFee;
-        prizePool += betPrice;
-        _slots.push(msg.sender);
+        require(msg.sender != owner(), "Lottery: Owner of lottery is not authorized to bet");
+        lotteryFeePool += betFee;
+        lotteryCashPool += betPrice;
+        lotteryPlayers.push(msg.sender);
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
-    }
-
-    ///@notice Calls the bet function times times
-    function betMany(uint256 times) public {
-        require(times > 0);
-        while (times > 0) {
-            bet();
-            times--;
-        }
     }
 
     /// @notice Close the lottery and claculates  the price if any,
     /// @dev Anyone can call this function if the owenr fails to do so
-    function  closeLottery() public {
+    function  closeLottery() public lotteryCanBeClosed isMemberOfLottery {
         require(block.timestamp >= closingTime, "Lottery: Can not close lottery yet");
         require(betsOpen, "Lottery: Already closed");
-        if(_slots.length > 0) {
-            uint256 winnerIndex = getRandomNumber() % _slots.length;
-            address winner = _slots[winnerIndex];
-            prize[winner] += prizePool;
-            prizePool = 0;
-            delete (_slots);
+        if(lotteryPlayers.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % lotteryPlayers.length;
+            address winner = lotteryPlayers[winnerIndex];
+            winningPrize[winner] += lotteryCashPool;
+            lotteryCashPool = 0;
+            delete (lotteryPlayers);
         }
         betsOpen = false;
     }
@@ -104,26 +94,30 @@ contract Lottery is Ownable {
    }
 
    ///@notice Withdraw amount from that account prize pool
-   function prizeWithdraw(uint256 amount) public {
-    require(amount <= prize[msg.sender], "Lottery: Not enought prize");
-    prize[msg.sender] -= amount;
+   function prizeWithdraw(uint256 amount) public isMemberOfLottery {
+    require(amount <= winningPrize[msg.sender], "Lottery: Not enought prize");
+    winningPrize[msg.sender] -= amount;
     paymentToken.transfer(msg.sender, amount);
    }
 
    ///@notice Withdraw amount from the owner pool
-   function ownerWithdraw(uint256 amount) public onlyOwner {
-    require(amount <= ownerPool, "Lottery: Not enough fees collected");
-    ownerPool -= amount;
+   function ownerWithdrawFees(uint256 amount) public onlyOwner {
+    require(amount <= lotteryFeePool, "Lottery: Not enough fees collected");
+    lotteryFeePool -= amount;
     paymentToken.transfer(msg.sender, amount);
    }
 
    ///@notice Burn amount tokens and give the equivalent ETH back to user
    function returnTokens(uint256 amount) public {
     paymentToken.burnFrom(msg.sender, amount);
-    payable(msg.sender).transfer(amount);
+    (bool success, ) = payable(msg.sender).call{value: amount}("");
+    require(success, "Lottery: Fails burning tokens and returning Ethers");
+    
    }
 
    fallback() external payable {
     paymentToken.mint(msg.sender, msg.value);
    }
+
+   receive() external payable {}
 }
