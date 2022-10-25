@@ -6,24 +6,26 @@ import {LotteryToken} from "./LotteryToken.sol";
 
 contract Lottery is Ownable {
     LotteryToken public paymentToken;
-    uint256 public closingTime;
-    bool public betsOpen;
-    uint256 public betPrice;
-    uint256 public betFee;
-    // mapping(address => bool) public lotteryTokenHolders;
-    // address[] public lotteryPlayers;
-
     ///@notice Amount of tokens in the prize pool
-    uint256 public prizePool;
-
+    uint256 public lotteryCashPool;
     ///@notice Amount of tokens in the owner pool
-    uint256 public ownerPool;
+    uint256 public lotteryFeePool;
+    uint256 private lotteryFeeToWithdraw;
+    uint256 public betPrice;
+    uint256 public closingTime;
+    uint256 public betFee;
+    uint256 public baseFeeToWithdrawPrize;
+    uint256 private winningPrizeToTransfer;
 
-    ///@notice Mapping of the prize availabel for withdraw for each account
-    mapping(address => uint256) public prize;
+    address[] public lotteryPlayers;
+    address public latestLotteryWinner;
 
-    ///@dev List of bet slots
-    address[] _slots;
+    bool public betsOpen;
+
+    mapping(address => uint256) public winningPrize;
+    mapping(address => bool) public lotteryTokenHolders;
+    mapping(address => uint256) public latestBurntAmount;
+    mapping(address => uint256) private burntAmountToTransfer;
 
     constructor(string memory tokenName, string memory tokenSymbol, uint256 _betPrice, uint256 _betFee) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
