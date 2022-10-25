@@ -23,7 +23,7 @@ contract Lottery is Ownable {
     bool public betsOpen;
 
     mapping(address => uint256) public winningPrize;
-    mapping(address => bool) public lotteryTokenHolders;
+    mapping(address => bool) public lotteryMembers;
     mapping(address => uint256) public latestBurntAmount;
     mapping(address => uint256) private burntAmountToTransfer;
 
@@ -31,6 +31,7 @@ contract Lottery is Ownable {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
         betPrice = _betPrice;
         betFee = _betFee;
+        lotteryMembers[msg.sender] = true;
     }
 
     modifier whenBetsClosed() {
@@ -42,10 +43,14 @@ contract Lottery is Ownable {
         require(betsOpen && block.timestamp < closingTime, "Lottery: Bets are closed");
         _;
     }
-
+   
     modifier lotteryCanBeClosed() {
-        require(betsOpen, "Lottery: Bets are closed");
-        require(block.timestamp > closingTime, "Lottery: Time for bets has passed");
+        require(betsOpen && block.timestamp > closingTime, "Lottery: Can not be closed yet !");
+        _;
+    }
+
+    modifier isMemberOfLottery() {
+        require(lotteryMembers[msg.sender] == true, "Lottery: Account is not Player or Owner");
         _;
     }
 
@@ -118,7 +123,7 @@ contract Lottery is Ownable {
     payable(msg.sender).transfer(amount);
    }
 
-   receive() external payable {
+   fallback() external payable {
     paymentToken.mint(msg.sender, msg.value);
    }
 }
