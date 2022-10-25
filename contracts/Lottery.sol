@@ -10,6 +10,8 @@ contract Lottery is Ownable {
     bool public betsOpen;
     uint256 public betPrice;
     uint256 public betFee;
+    // mapping(address => bool) public lotteryTokenHolders;
+    // address[] public lotteryPlayers;
 
     ///@notice Amount of tokens in the prize pool
     uint256 public prizePool;
@@ -36,6 +38,12 @@ contract Lottery is Ownable {
 
     modifier whenBetsOpen() {
         require(betsOpen && block.timestamp < closingTime, "Lottery: Bets are closed");
+        _;
+    }
+
+    modifier lotteryCanBeClosed() {
+        require(betsOpen, "Lottery: Bets are closed");
+        require(block.timestamp > closingTime, "Lottery: Time for bets has passed");
         _;
     }
 
