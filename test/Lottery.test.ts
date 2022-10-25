@@ -79,7 +79,23 @@ describe("Lottery", function() {
         expect(balAddr1.toString()).to.eq("2000000000000000000");
         expect(balAddr2.toString()).to.eq("2000000000000000000");
         expect(balAddr3.toString()).to.eq("2000000000000000000");
-    })
+    });
+
+    it("Should revert if trying to place a bet before bet is open", async () => {
+
+    });
+
+    it("Only owner can open the bets", async() => {
+
+    });
+
+    it("Should place bets", async () => {
+
+    });
+
+    it("Should close the bets and calculate the winner", async () => {
+
+    });
 
 
 })
