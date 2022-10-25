@@ -48,7 +48,7 @@ contract Lottery is Ownable {
     }
 
     /// @param _closingTime target time in seconds expressed in epoch time for the bets to close
-    function openBets(uint256 _closingTime) public onlyOwner {
+    function openBets(uint256 _closingTime) public onlyOwner whenBetsClosed {
         require(_closingTime > block.timestamp, "Lottery: Closing time must be in the future");
         closingTime = _closingTime;
         betsOpen = true;
@@ -114,5 +114,9 @@ contract Lottery is Ownable {
    function returnTokens(uint256 amount) public {
     paymentToken.burnFrom(msg.sender, amount);
     payable(msg.sender).transfer(amount);
+   }
+
+   receive() external payable {
+    paymentToken.mint(msg.sender, msg.value);
    }
 }
