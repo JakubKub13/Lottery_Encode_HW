@@ -6,15 +6,14 @@ import {LotteryToken} from "./LotteryToken.sol";
 
 contract Lottery is Ownable {
     LotteryToken public paymentToken;
+
     ///@notice Amount of tokens in the prize pool
     uint256 public lotteryCashPool;
-    ///@notice Amount of tokens in the owner pool
+    ///@notice Amount of tokens in the fee pool
     uint256 public lotteryFeePool;
-    uint256 private lotteryFeeToWithdraw;
     uint256 public betPrice;
-    uint256 public closingTime;
     uint256 public betFee;
-    uint256 private winningPrizeToTransfer;
+     uint256 public closingTime;
 
     address[] public lotteryPlayers;
     address public latestLotteryWinner;
@@ -22,7 +21,16 @@ contract Lottery is Ownable {
     bool public betsOpen;
 
     mapping(address => uint256) public winningPrize;
+    mapping(address => bool) public hasAlreadyBetted;
     mapping(address => bool) public lotteryMembers;
+
+    event OpenBets(address owner, uint256 openAt);
+    event TokensMinted(address from, address to, uint256 amount);
+    event Betted(address player, bool betted);
+    event CloseLottery(address closer, uint256 closedAt);
+    event PrizeWithdraw(address winner, uint256 amount);
+    event FeeWithdraw(address owner, uint256 amount);
+    event TokensBurned(address from, address to, uint256 amount);
 
     constructor(string memory tokenName, string memory tokenSymbol, uint256 _betPrice, uint256 _betFee) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
@@ -56,20 +64,25 @@ contract Lottery is Ownable {
         require(_closingTime > block.timestamp, "Lottery: Closing time must be in the future");
         closingTime = _closingTime;
         betsOpen = true;
+        emit OpenBets(msg.sender, block.timestamp);
     }
 
     /// @notice Give tokens based on the amount of ETH sent
     function purchaseTokens() public payable {
         lotteryMembers[msg.sender] = true;
         paymentToken.mint(msg.sender, msg.value);
+        emit TokensMinted(address(0), msg.sender, msg.value);
     }
 
     function bet() public whenBetsOpen {
+        require(hasAlreadyBetted[msg.sender] == false, "Lottery: Player has already betted once" );
         require(msg.sender != owner(), "Lottery: Owner of lottery is not authorized to bet");
         lotteryFeePool += betFee;
         lotteryCashPool += betPrice;
         lotteryPlayers.push(msg.sender);
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
+        hasAlreadyBetted[msg.sender] = true;
+        emit Betted(msg.sender, true);
     }
 
     /// @notice Close the lottery and claculates  the price if any,
@@ -85,6 +98,7 @@ contract Lottery is Ownable {
             delete (lotteryPlayers);
         }
         betsOpen = false;
+        emit CloseLottery(msg.sender, block.timestamp);
     }
 
     /// @notice Get a random number calculated from the previous block randao
@@ -98,6 +112,7 @@ contract Lottery is Ownable {
     require(amount <= winningPrize[msg.sender], "Lottery: Not enought prize");
     winningPrize[msg.sender] -= amount;
     paymentToken.transfer(msg.sender, amount);
+    emit PrizeWithdraw(msg.sender, amount);
    }
 
    ///@notice Withdraw amount from the owner pool
@@ -105,6 +120,7 @@ contract Lottery is Ownable {
     require(amount <= lotteryFeePool, "Lottery: Not enough fees collected");
     lotteryFeePool -= amount;
     paymentToken.transfer(msg.sender, amount);
+    emit FeeWithdraw(msg.sender, amount);
    }
 
    ///@notice Burn amount tokens and give the equivalent ETH back to user
@@ -112,11 +128,12 @@ contract Lottery is Ownable {
     paymentToken.burnFrom(msg.sender, amount);
     (bool success, ) = payable(msg.sender).call{value: amount}("");
     require(success, "Lottery: Fails burning tokens and returning Ethers");
-    
+
    }
 
    fallback() external payable {
     paymentToken.mint(msg.sender, msg.value);
+    emit TokensMinted(address(0), msg.sender, msg.value);
    }
 
    receive() external payable {}
