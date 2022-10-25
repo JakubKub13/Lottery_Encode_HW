@@ -131,10 +131,10 @@ contract Lottery is Ownable {
 
    }
 
-   fallback() external payable {
+   receive() external payable {
     paymentToken.mint(msg.sender, msg.value);
     emit TokensMinted(address(0), msg.sender, msg.value);
    }
 
-   receive() external payable {}
+//  fallback() external payable {}
 }

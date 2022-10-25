@@ -2,18 +2,20 @@ import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 import { Lottery, LotteryToken } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { Wallet } from "ethers";
+
+
 
 const TOKEN_NAME: string = "Lottery Token";
 const TOKEN_SYMBOL: string = "Lt0";
 const BET_PRICE = 0.1;
 const BET_FEE = 0.02;
+const CLOSING_TIME = 50;
 
 
 describe("Lottery", function() {
     let lottery: Lottery;
     let lotteryToken: LotteryToken;
-    let deployer: SignerWithAddress;
+    let owner: SignerWithAddress;
     let account1: SignerWithAddress;
     let account2: SignerWithAddress;
     let account3: SignerWithAddress;
@@ -30,7 +32,7 @@ describe("Lottery", function() {
         const tokenAddress = await lottery.paymentToken();
         const tokenFactory = await ethers.getContractFactory("LotteryToken")
         lotteryToken = tokenFactory.attach(tokenAddress);
-        [deployer, account1, account2, account3] = await ethers.getSigners();
+        [owner, account1, account2, account3] = await ethers.getSigners();
     });
 
     it("Should Deploy without errors", async function() {
@@ -82,15 +84,23 @@ describe("Lottery", function() {
     });
 
     it("Should revert if trying to place a bet before bet is open", async () => {
-
+        await expect(lottery.connect(account1).bet()).to.be.revertedWith("Lottery: Bets are closed")
     });
 
     it("Only owner can open the bets", async() => {
-
+        const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+        const closingTime = currentTime + CLOSING_TIME;
+        await expect(lottery.connect(account1).openBets(closingTime)).to.be.rejectedWith("Ownable: caller is not the owner")    //revertedWith("Ownable: caller is not the owner")
     });
 
-    it("Should place bets", async () => {
+    it("Only owner can open the bets2", async () => {
+        const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+        const closingTime = currentTime + CLOSING_TIME;
+        await expect(lottery.openBets(closingTime)).to.emit(lottery, "OpenBets")
+    });
 
+    it("Should revert when lottery is not open", async () => {
+        await expect(lottery.connect(account1).bet()).to.be.rejectedWith("Lottery: Bets are closed")
     });
 
     it("Should close the bets and calculate the winner", async () => {
