@@ -103,8 +103,28 @@ describe("Lottery", function() {
         await expect(lottery.connect(account1).bet()).to.be.rejectedWith("Lottery: Bets are closed")
     });
 
-    it("Should close the bets and calculate the winner", async () => {
-
+    it("Players should place bets when lottery is opened", async () => {
+        const amountToBuy = ethers.utils.parseUnits("2", "ether");
+        const tx = await lottery.connect(account1).purchaseTokens({ value: amountToBuy });
+        const tx2 = await lottery.connect(account2).purchaseTokens({ value: amountToBuy });
+        const tx3 = await lottery.connect(account3).purchaseTokens({ value: amountToBuy });
+        await tx.wait();
+        await tx2.wait();
+        await tx3.wait();
+        const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+        const closingTime = currentTime + CLOSING_TIME;
+        const amountToApprove = await lotteryToken.balanceOf(account1.address);
+        const apprTx1 = await lotteryToken.connect(account1).approve(lottery.address, amountToApprove);
+        const apprTx2 = await lotteryToken.connect(account2).approve(lottery.address, amountToApprove);
+        const apprTx3 = await lotteryToken.connect(account3).approve(lottery.address, amountToApprove);
+        await apprTx1.wait();
+        await apprTx2.wait();
+        await apprTx3.wait();
+        const openTx = await lottery.openBets(closingTime);
+        await openTx.wait();
+        await expect(lottery.connect(account1).bet()).to.emit(lottery, "Betted");
+        await expect(lottery.connect(account2).bet()).to.emit(lottery, "Betted");
+        await expect(lottery.connect(account3).bet()).to.emit(lottery, "Betted");
     });
 
 
