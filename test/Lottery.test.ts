@@ -2,6 +2,7 @@ import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 import { Lottery, LotteryToken } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { Wallet } from "ethers";
 
 const TOKEN_NAME: string = "Lottery Token";
 const TOKEN_SYMBOL: string = "Lt0";
@@ -58,6 +59,27 @@ describe("Lottery", function() {
         expect(balAddr2.toString()).to.eq("2000000000000000000");
         expect(balAddr3.toString()).to.eq("2000000000000000000");
     });
+
+    it("Should be able to mint Lottery tokens if ETH are send directly without calling purchaseToken()", async () => {
+        const amountToBuy = ethers.utils.parseUnits("2", "ether");
+        const lotteryAddr = lottery.address;
+        let tx = {
+            to: lotteryAddr,
+            value: amountToBuy
+        }
+        const txSent1 = await account1.sendTransaction(tx);
+        await txSent1.wait();
+        const txSent2 = await account2.sendTransaction(tx);
+        await txSent2.wait();
+        const txSend3 = await account3.sendTransaction(tx);
+        await txSend3.wait(); 
+        const balAddr1 = await lotteryToken.balanceOf(account1.address);
+        const balAddr2 = await lotteryToken.balanceOf(account2.address);
+        const balAddr3 = await lotteryToken.balanceOf(account3.address);
+        expect(balAddr1.toString()).to.eq("2000000000000000000");
+        expect(balAddr2.toString()).to.eq("2000000000000000000");
+        expect(balAddr3.toString()).to.eq("2000000000000000000");
+    })
 
 
 })
