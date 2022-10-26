@@ -218,7 +218,7 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function displayPrize(index: string) {
-    const prize = await lottery.prize(accounts[Number(index)].address);
+    const prize = await lottery.winningPrize(accounts[Number(index)].address);
     const formattedPrize = ethers.utils.formatEther(prize);
     console.log(`The amount of prize in lottery tokens of address is: ${formattedPrize}`);
     return prize;
@@ -236,14 +236,14 @@ function menuOptions(rl: readline.Interface) {
   }
   
   async function displayOwnerPool() {
-    const ownerPool = await lottery.ownerPool();
+    const ownerPool = await lottery.lotteryFeePool();
     const ownerPoolFormatted = ethers.utils.formatEther(ownerPool);
     console.log(ownerPoolFormatted);
   }
   
   async function withdrawTokens(amount: string) {
     const parsedAmount = ethers.utils.parseEther(amount)
-    const tx = await lottery.ownerWithdraw(parsedAmount);
+    const tx = await lottery.ownerWithdrawFees(parsedAmount);
     const receipt = await tx.wait();
     const balanceOfOwnerAft = await token.balanceOf(accounts[0].address);
     const balanceOfOwnerAftFormatted = ethers.utils.formatEther(balanceOfOwnerAft);
