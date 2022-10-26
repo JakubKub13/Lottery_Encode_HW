@@ -278,12 +278,81 @@ describe("Lottery", function() {
             const closingTime = currentTime + CLOSING_TIME;
             await expect(lottery.openBets(closingTime)).to.emit(lottery, "OpenBets");
         });
-    });
+   
+        it("Winner should withdraw Lottery tokens from contract and it should reset winningPrice", async () => {
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const winner = await lottery.latestLotteryWinner();
+            const prize = await lottery.winningPrize(winner);
+            expect(winner).to.eq(account1.address);
+            const prizeWthTx = await lottery.connect(account1).prizeWithdraw(prize);
+            await prizeWthTx.wait();
+            const prizeAft = await lottery.winningPrize(winner);
+            expect(prizeAft).to.eq(0);
+        });
 
-    describe("Withdraw from lottery and burning the tokens", function () {
-        beforeEach(async () => {
-            
-        })
-    })
-})
+        it("Owner can burn tokens and get ETH back", async () => {
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const feePoolAmBf = await lottery.lotteryFeePool();
+            expect(ethers.utils.formatEther(feePoolAmBf)).to.eq("0.06");
+            const feeWithdrawTx = await lottery.ownerWithdrawFees(feePoolAmBf);
+            await feeWithdrawTx.wait();
+            const feePoolAmAf = await lottery.lotteryFeePool();
+            expect(ethers.utils.formatEther(feePoolAmAf)).to.eq("0.0");
+            const balanceOfLT0Owner = await lotteryToken.balanceOf(owner.address);
+            const balanceOfETHOwner = await ethers.provider.getBalance(owner.address);
+            const apprTx = await lotteryToken.connect(owner).approve(lottery.address, balanceOfLT0Owner);
+            await apprTx.wait();
+            const returnTx = await lottery.returnTokens(balanceOfLT0Owner);
+            await returnTx.wait();
+            const balanceOfLT0OwnerAf = await lotteryToken.balanceOf(owner.address);
+            const balanceOfETHOwnerAf = await ethers.provider.getBalance(owner.address);
+            expect(Number(ethers.utils.formatEther(balanceOfLT0Owner))).to.be.greaterThan(Number(ethers.utils.formatEther(balanceOfLT0OwnerAf)));
+            expect(Number(ethers.utils.formatEther(balanceOfETHOwner))).to.be.lessThan(Number(ethers.utils.formatEther(balanceOfETHOwnerAf)));
+        });
+
+        it("Winner can burn tokens and get back ETH", async () => {
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const winner = await lottery.latestLotteryWinner();
+            const prize = await lottery.winningPrize(winner);
+            expect(winner).to.eq(account1.address);
+            const balanceOfLT0Winner = await lotteryToken.balanceOf(account1.address);
+            const balanceOfETHWinner = await ethers.provider.getBalance(account1.address);
+            const apprTx = await lotteryToken.approve(lottery.address, prize);
+            await apprTx.wait();
+            const returnTx = await lottery.connect(account1).returnTokens(prize);
+            await returnTx.wait();
+            const balanceOfLT0WinnerAf = await lotteryToken.balanceOf(account1.address);
+            const balanceOfETHWinnerAf = await ethers.provider.getBalance(account1.address);
+            expect(Number(ethers.utils.formatEther(balanceOfLT0Winner))).to.be.greaterThan(Number(ethers.utils.formatEther(balanceOfLT0WinnerAf)));
+            expect(Number(ethers.utils.formatEther(balanceOfETHWinner))).to.be.lessThan(Number(ethers.utils.formatEther(balanceOfETHWinnerAf)));
+        });
+    });
+});
   
