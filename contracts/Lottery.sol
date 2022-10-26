@@ -92,8 +92,8 @@ contract Lottery is Ownable {
         require(betsOpen, "Lottery: Already closed");
         if(lotteryPlayers.length > 0) {
             uint256 winnerIndex = getRandomNumber() % lotteryPlayers.length;
-            address winner = lotteryPlayers[winnerIndex];
-            winningPrize[winner] += lotteryCashPool;
+            latestLotteryWinner = lotteryPlayers[winnerIndex];
+            winningPrize[latestLotteryWinner] += lotteryCashPool;
             lotteryCashPool = 0;
             delete (lotteryPlayers);
         }

@@ -201,24 +201,89 @@ describe("Lottery", function() {
         });
 
         it("Should calculate the latest Lottery winner", async () => {
-
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const winner = await lottery.latestLotteryWinner();
+            console.log(`Address of lottery winner is: ${winner}`)
         });
 
         it("Should update the winning price for address of winner", async () => {
-
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const winner = await lottery.latestLotteryWinner();
+            const winnerPrize = await lottery.winningPrize(winner);
+            const formattedPrize = ethers.utils.formatEther(winnerPrize);
+            expect(formattedPrize).to.eq("0.300000000000000018")
         });
         
         it("Should reset lottery cash pool", async () => {
-
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const cashPoolAfter = await lottery.lotteryCashPool();
+            expect(cashPoolAfter).to.eq(0);
         });
 
         it("Only owner can withdraw fees from lotteryFeePool", async() => {
-
-        })
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const feeWithdraw = await lottery.lotteryFeePool();
+            await expect(lottery.connect(account2).ownerWithdrawFees(feeWithdraw)).to.be.revertedWith("Ownable: caller is not the owner");
+            await expect(lottery.ownerWithdrawFees(feeWithdraw)).to.emit(lottery, "FeeWithdraw");
+        });
 
         it("Lottery can be opened again", async () => {
-
+            const betTx1 = await lottery.connect(account1).bet();
+            const betTx2 = await lottery.connect(account2).bet();
+            const betTx3 = await lottery.connect(account3).bet();
+            await betTx1.wait();
+            await betTx2.wait();
+            await betTx3.wait();
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            const clsTx = await lottery.closeLottery();
+            await clsTx.wait();
+            const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+            const closingTime = currentTime + CLOSING_TIME;
+            await expect(lottery.openBets(closingTime)).to.emit(lottery, "OpenBets");
         });
     });
+
+    describe("Withdraw from lottery and burning the tokens", function () {
+        beforeEach(async () => {
+            
+        })
+    })
 })
   
