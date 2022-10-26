@@ -1,5 +1,6 @@
+import { ChainId, Token, TokenAmount, Pair, Trade, TradeType, Route } from '@uniswap/sdk'
 import { expect, assert } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Lottery, LotteryToken } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
@@ -19,6 +20,7 @@ describe("Lottery", function() {
     let account1: SignerWithAddress;
     let account2: SignerWithAddress;
     let account3: SignerWithAddress;
+    let nonLotteryMem: SignerWithAddress;
 
     beforeEach(async function() {
         const lotteryFactory = await ethers.getContractFactory("Lottery");
@@ -32,7 +34,7 @@ describe("Lottery", function() {
         const tokenAddress = await lottery.paymentToken();
         const tokenFactory = await ethers.getContractFactory("LotteryToken")
         lotteryToken = tokenFactory.attach(tokenAddress);
-        [owner, account1, account2, account3] = await ethers.getSigners();
+        [owner, account1, account2, account3, nonLotteryMem] = await ethers.getSigners();
     });
 
     it("Should Deploy without errors", async function() {
@@ -90,7 +92,7 @@ describe("Lottery", function() {
     it("Only owner can open the bets", async() => {
         const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
         const closingTime = currentTime + CLOSING_TIME;
-        await expect(lottery.connect(account1).openBets(closingTime)).to.be.rejectedWith("Ownable: caller is not the owner")    //revertedWith("Ownable: caller is not the owner")
+        await expect(lottery.connect(account1).openBets(closingTime)).to.be.revertedWith("Ownable: caller is not the owner")    //revertedWith("Ownable: caller is not the owner")
     });
 
     it("Only owner can open the bets2", async () => {
@@ -100,7 +102,7 @@ describe("Lottery", function() {
     });
 
     it("Should revert when lottery is not open", async () => {
-        await expect(lottery.connect(account1).bet()).to.be.rejectedWith("Lottery: Bets are closed")
+        await expect(lottery.connect(account1).bet()).to.be.revertedWith("Lottery: Bets are closed")
     });
 
     it("Players should place bets when lottery is opened", async () => {
@@ -158,11 +160,9 @@ describe("Lottery", function() {
         expect(addr1).to.eq(account1.address);
         expect(addr2).to.eq(account2.address);
         expect(addr3).to.eq(account3.address);
+    });
 
-        
-    })
-
-    describe("Lottery picking the winner", function () {
+    describe("Lottery closing", function () {
         beforeEach(async () => {
             const amountToBuy = ethers.utils.parseUnits("2", "ether");
             const tx = await lottery.connect(account1).purchaseTokens({ value: amountToBuy });
@@ -184,13 +184,41 @@ describe("Lottery", function() {
             await openTx.wait();
         });
 
-        it("Can be closed only after time has passed", async () => {
-            await expect(lottery.closeLottery()).to.be.revertedWith("Lottery: Can not close lottery yet");
+        it("Lottery can not be closed before time has passed", async () => {
+            await expect(lottery.closeLottery()).to.be.revertedWith("Lottery: Can not be closed yet !");
+        });
+
+        it("Lottery can not be closed by non Lottery member", async () => {
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            await expect(lottery.connect(nonLotteryMem).closeLottery()).to.be.revertedWith("Lottery: Account is not Player or Owner")
+        });
+
+        it("Lottery can be closed by any Lottery member after time has passed", async () => {
+            await network.provider.send("evm_increaseTime", [360]);
+            await network.provider.send("evm_mine");
+            await expect(lottery.connect(account2).closeLottery()).to.emit(lottery, "CloseLottery");
+        });
+
+        it("Should calculate the latest Lottery winner", async () => {
+
+        });
+
+        it("Should update the winning price for address of winner", async () => {
+
+        });
+        
+        it("Should reset lottery cash pool", async () => {
+
+        });
+
+        it("Only owner can withdraw fees from lotteryFeePool", async() => {
 
         })
 
+        it("Lottery can be opened again", async () => {
 
-    })
-
-
+        });
+    });
 })
+  
