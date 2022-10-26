@@ -7,11 +7,9 @@ async function main() {
     let lottery: Lottery;
     let token: LotteryToken;
 
-    const BET_PRICE = 1;
-    const BET_FEE = 0.2;
+    const BET_PRICE = 0.01;
+    const BET_FEE = 0.002;
 
-    const [deployer] = await ethers.getSigners();
-    const chainId = network.config.chainId;
     const lotteryFactory = await ethers.getContractFactory("Lottery");
     lottery = await lotteryFactory.deploy(
         "LotteryToken",

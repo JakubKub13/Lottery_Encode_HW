@@ -1,5 +1,4 @@
-import { ChainId, Token, TokenAmount, Pair, Trade, TradeType, Route } from '@uniswap/sdk'
-import { expect, assert } from "chai";
+import { expect} from "chai";
 import { ethers, network } from "hardhat";
 import { Lottery, LotteryToken } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";

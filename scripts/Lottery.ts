@@ -7,8 +7,8 @@ let lottery: Lottery;
 let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
-const BET_PRICE = 1;
-const BET_FEE = 0.2;
+const BET_PRICE = 0.01;
+const BET_FEE = 0.002;
 
 async function main() {
     await initContracts();
