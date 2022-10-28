@@ -13,7 +13,7 @@ contract Lottery is Ownable {
     uint256 public lotteryFeePool;
     uint256 public betPrice;
     uint256 public betFee;
-     uint256 public closingTime;
+    uint256 public closingTime;
 
     address[] public lotteryPlayers;
     address public latestLotteryWinner;
