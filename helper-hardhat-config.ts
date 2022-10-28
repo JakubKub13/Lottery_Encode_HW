@@ -21,7 +21,7 @@ export const networkConfig: networkConfigInfo = {
     80001: {
         name: "mumbai",
         lottery: "0x660535218050C2860250C68df9d47b5eB0C49aA5",
-        lotteryToken: "0xd212B4C2FB54A4C3C35f4EADaf3B329Ae93bB86C";
+        lotteryToken: "0xd212B4C2FB54A4C3C35f4EADaf3B329Ae93bB86C"
     },
     1: {
         name: "mainnet",
