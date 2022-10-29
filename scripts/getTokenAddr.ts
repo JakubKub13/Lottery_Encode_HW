@@ -285,25 +285,6 @@ async function main() {
         "type": "function"
       },
       {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "name": "hasAlreadyBetted",
-        "outputs": [
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
         "inputs": [],
         "name": "latestLotteryWinner",
         "outputs": [
@@ -508,6 +489,7 @@ async function main() {
         "stateMutability": "payable",
         "type": "receive"
       }
+    
     ]
     
     lottery = new ethers.Contract(lotteryAddr, lottery_ABI, provider) as Lottery;

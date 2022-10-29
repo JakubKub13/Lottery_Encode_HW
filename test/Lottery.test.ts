@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 
 const TOKEN_NAME: string = "Lottery Token";
-const TOKEN_SYMBOL: string = "Lt0";
+const TOKEN_SYMBOL: string = "LotTok";
 const BET_PRICE = 0.1;
 const BET_FEE = 0.02;
 const CLOSING_TIME = 50;
