@@ -21,7 +21,7 @@ contract Lottery is Ownable {
     bool public betsOpen;
 
     mapping(address => uint256) public winningPrize;
-    mapping(address => bool) public lotteryMembers;
+    mapping(address => bool) public lotteryMembers; 
 
     event OpenBets(address owner, uint256 openAt);
     event TokensMinted(address from, address to, uint256 amount);
