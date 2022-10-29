@@ -21,7 +21,6 @@ contract Lottery is Ownable {
     bool public betsOpen;
 
     mapping(address => uint256) public winningPrize;
-    mapping(address => bool) public hasAlreadyBetted;
     mapping(address => bool) public lotteryMembers;
 
     event OpenBets(address owner, uint256 openAt);
@@ -75,13 +74,11 @@ contract Lottery is Ownable {
     }
 
     function bet() public whenBetsOpen {
-        require(hasAlreadyBetted[msg.sender] == false, "Lottery: Player has already betted once" );
         require(msg.sender != owner(), "Lottery: Owner of lottery is not authorized to bet");
         lotteryFeePool += betFee;
         lotteryCashPool += betPrice;
         lotteryPlayers.push(msg.sender);
         paymentToken.transferFrom(msg.sender, address(this), betPrice + betFee);
-        hasAlreadyBetted[msg.sender] = true;
         emit Betted(msg.sender, true);
     }
 
